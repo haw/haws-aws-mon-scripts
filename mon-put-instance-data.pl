@@ -32,7 +32,8 @@ Description of available options:
   --disk-space-used   Reports allocated disk space in gigabytes.
   --disk-space-avail  Reports available disk space in gigabytes.
   
-  --apache-worker    Reports Apache Worker Prosess counts.
+  --apache-worker     Reports Apache Worker Prosess counts.
+  --nginx-worker      Reports nginx Worker Prosess counts.
   
   --aggregated[=only]    Adds aggregated metrics for instance type, AMI id, and overall.
   --auto-scaling[=only]  Adds aggregated metrics for Auto Scaling group.
@@ -107,6 +108,7 @@ my $report_disk_util;
 my $report_disk_used;
 my $report_disk_avail;
 my $report_apache_worker;
+my $report_nginx_worker;
 my $mem_used_incl_cache_buff;
 my @mount_path;
 my $mem_units;
@@ -146,6 +148,7 @@ my $argv_size = @ARGV;
     'disk-space-used' => \$report_disk_used,
     'disk-space-avail' => \$report_disk_avail,
     'apache-worker' => \$report_apache_worker,
+    'nginx-worker' => \$report_nginx_worker,
     'auto-scaling:s' => \$auto_scaling,
     'aggregated:s' => \$aggregated,
     'memory-units:s' => \$mem_units,
@@ -285,7 +288,7 @@ if (!$report_disk_space && ($report_disk_util || $report_disk_used || $report_di
 # check that there is a need to monitor at least something
 if (!$report_mem_util && !$report_mem_used && !$report_mem_avail
   && !$report_swap_util && !$report_swap_used && !$report_disk_space
-  && !$report_apache_worker)
+  && !$report_apache_worker && !$report_nginx_worker)
 {
   exit_with_error("No metrics specified for collection and submission to CloudWatch.");
 }
@@ -458,6 +461,15 @@ if ($report_apache_worker)
   my $ps = `/bin/ps axww | /bin/grep [h]ttpd | /usr/bin/wc -l`;
 
   add_metric('ApacheWorkerProsess', 'Count', $ps);
+}
+
+# collect nginx metrics
+
+if ($report_nginx_worker)
+{
+  my $ps = `/bin/ps axww | /bin/grep [n]ginx | /bin/grep [w]orker | /usr/bin/wc -l`;
+
+  add_metric('nginxWorkerProsess', 'Count', $ps);
 }
 
 # send metrics over to CloudWatch if any
