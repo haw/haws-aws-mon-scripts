@@ -24,6 +24,8 @@ mon-put-instance-data.pl
     
     --unicorn-worker    Reports Unicorn Worker Prosess counts.
     
+    --mysqld-prosess    Reports MySQL Daemon Prosess counts.
+    
     --aggregated[=only]    Adds aggregated metrics for instance type, AMI id, and overall.
     --auto-scaling[=only]  Adds aggregated metrics for Auto Scaling group.
                            If =only is specified, reports only aggregated metrics.
