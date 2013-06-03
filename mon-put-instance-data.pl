@@ -517,9 +517,7 @@ if ($report_mysqld_prosess)
     exit_with_error("Path to MySQL config file is not provided.");
   }
 
-  system("/usr/bin/mysqladmin --defaults-file=$mysqld_config_file ping");
-
-  add_metric('MySQLDaemonProsess', 'Count', $?);
+  add_metric('MySQLDaemonProsess', 'Count', system("/usr/bin/mysqladmin --defaults-file=$mysqld_config_file ping > /dev/null"));
 }
 
 # send metrics over to CloudWatch if any
