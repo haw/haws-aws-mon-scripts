@@ -117,6 +117,7 @@ my $report_nginx_worker;
 my $report_unicorn_worker;
 my $report_unicorn_memory;
 my $report_mysqld_prosess;
+my $mysqld_config_file;
 my $mem_used_incl_cache_buff;
 my @mount_path;
 my $mem_units;
