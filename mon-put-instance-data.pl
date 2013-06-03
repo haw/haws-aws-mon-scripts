@@ -36,6 +36,7 @@ Description of available options:
   --nginx-worker      Reports nginx Worker Prosess counts.
 
   --unicorn-worker    Reports Unicorn Worker Prosess counts.
+  --unicorn-memory    Reports Unicorn Worker Prosess memory.
 
   --mysqld-prosess    Reports MySQL Daemon Prosess counts.
   
@@ -114,6 +115,7 @@ my $report_disk_avail;
 my $report_apache_worker;
 my $report_nginx_worker;
 my $report_unicorn_worker;
+my $report_unicorn_memory;
 my $report_mysqld_prosess;
 my $mem_used_incl_cache_buff;
 my @mount_path;
@@ -156,6 +158,7 @@ my $argv_size = @ARGV;
     'apache-worker' => \$report_apache_worker,
     'nginx-worker' => \$report_nginx_worker,
     'unicorn-worker' => \$report_unicorn_worker,
+    'unicorn-memory' => \$report_unicorn_memory,
     'mysqld-prosess' => \$report_mysqld_prosess,
     'auto-scaling:s' => \$auto_scaling,
     'aggregated:s' => \$aggregated,
@@ -297,7 +300,7 @@ if (!$report_disk_space && ($report_disk_util || $report_disk_used || $report_di
 if (!$report_mem_util && !$report_mem_used && !$report_mem_avail
   && !$report_swap_util && !$report_swap_used && !$report_disk_space
   && !$report_apache_worker && !$report_nginx_worker
-  && !$report_unicorn_worker && !$report_mysqld_prosess)
+  && !$report_unicorn_worker && !$report_unicorn_memory && !$report_mysqld_prosess)
 {
   exit_with_error("No metrics specified for collection and submission to CloudWatch.");
 }
@@ -488,6 +491,17 @@ if ($report_unicorn_worker)
   my $ps = `/bin/ps axww | /bin/grep "[u]nicorn" | /bin/grep [w]orker | /usr/bin/wc -l`;
 
   add_metric('UnicornWorkerProsess', 'Count', $ps);
+}
+
+if ($report_unicorn_memory)
+{
+  my @ps = `/bin/ps axlww | /bin/grep "[u]nicorn" | /bin/grep [w]orker | /bin/awk {'print \$3,\$8'}`;
+
+  foreach my $line (@ps)
+  {
+    my @fields = split('\s+', $line);
+    add_metric('UnicornWorkerMemory/'.$fields[0], 'Kilobytes', $fields[1]);
+  }
 }
 
 # collect mysqld metrics
