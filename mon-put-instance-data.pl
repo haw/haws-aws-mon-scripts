@@ -160,6 +160,7 @@ my $argv_size = @ARGV;
     'unicorn-worker' => \$report_unicorn_worker,
     'unicorn-memory' => \$report_unicorn_memory,
     'mysqld-prosess' => \$report_mysqld_prosess,
+	'mysqld-config-file:s' => \$mysqld_config_file,
     'auto-scaling:s' => \$auto_scaling,
     'aggregated:s' => \$aggregated,
     'memory-units:s' => \$mem_units,
@@ -193,6 +194,9 @@ if ($from_cron) {
 }
 
 # check for empty values in provided arguments
+if (defined($mysqld_config_file) && length($mysqld_config_file) == 0) {
+  exit_with_error("Path to MySQL config file is not provided.");
+}
 if (defined($aws_credential_file) && length($aws_credential_file) == 0) {
   exit_with_error("Path to AWS credential file is not provided.");
 }
@@ -508,9 +512,13 @@ if ($report_unicorn_memory)
 
 if ($report_mysqld_prosess)
 {
-  my $ps = `/bin/ps axww | /bin/grep "[m]ysqld " | /usr/bin/wc -l`;
+  if(!defined($mysqld_config_file)){
+    exit_with_error("Path to MySQL config file is not provided.");
+  }
 
-  add_metric('MySQLDaemonProsess', 'Count', $ps);
+  system("/usr/bin/mysqladmin --defaults-file=$mysqld_config_file ping");
+
+  add_metric('MySQLDaemonProsess', 'Count', $?);
 }
 
 # send metrics over to CloudWatch if any
