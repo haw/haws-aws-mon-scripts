@@ -488,14 +488,14 @@ if ($report_nginx_worker)
 
 if ($report_unicorn_worker)
 {
-  my $ps = `/bin/ps axww | /bin/grep "[u]nicorn" | /bin/grep [w]orker | /usr/bin/wc -l`;
+  my $ps = `/bin/ps axww | /bin/grep "[u]nicorn worker" | /usr/bin/wc -l`;
 
   add_metric('UnicornWorkerProsess', 'Count', $ps);
 }
 
 if ($report_unicorn_memory)
 {
-  my @ps = `/bin/ps axlww | /bin/grep "[u]nicorn" | /bin/grep [w]orker | /bin/awk {'print \$3,\$8'}`;
+  my @ps = `/bin/ps axlww | /bin/grep "[u]nicorn [w]orker" | /bin/awk {'print \$3,\$8'}`;
 
   foreach my $line (@ps)
   {
